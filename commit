@@ -1,0 +1,40 @@
+Add a [slug] named folder on parent Level, Use below given code to create parent level dynamic pages,
+
+/* eslint-disable react-hooks/exhaustive-deps */
+import type { NextPage } from "next";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { adminServices } from "../../src/modules/services/methods";
+
+const DynamicPages: NextPage = () => {
+  const router = useRouter();
+  const { query } = useRouter();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [data, setData] = useState<Array<any>>([]);
+
+  const getHeader = async () => {
+    try {
+      const res = await adminServices.getFooter();
+      setData(
+        res.data[0]?.attributes?.navigation?.map((navData: any) => navData.slug)
+      );
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    getHeader();
+  }, []);
+
+  useEffect(() => {
+    if (query.slug) {
+      if (data.includes(query.slug as string)) {
+        setLoading(false);
+      } else {
+        router.push("/404");
+      }
+    }
+  }, [data.length]);
+
+  return loading ? <div>loading</div> : <div>This is dynamic page</div>;
+};
+export default DynamicPages;
